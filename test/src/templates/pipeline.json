@@ -1,0 +1,27 @@
+{
+  "type": "pipeline",
+  "uuid": "{{uuid}}",
+  "state": {
+    "name": "COMPLETED",
+    "type": "pipeline_state_completed",
+    "result": {
+      "name": "SUCCESSFUL",
+      "type": "pipeline_state_completed_successful"
+    }
+  },
+  "build_number": 1,
+  "created_on": "2021-03-10T00:32:47.890073Z",
+  "completed_on": "2021-03-10T00:33:08.060765Z",
+  "target": {
+    "type": "pipeline_ref_target",
+    "ref_type": "branch",
+    "ref_name": "wip",
+    "selector": {
+      "type": "default"
+    },
+    "commit": {
+      "type": "commit",
+      "hash": "aaeb1fdea659f397cc5e3b08d720d8acbc099185"
+    }
+  }
+}

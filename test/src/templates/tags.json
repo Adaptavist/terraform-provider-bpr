@@ -1,0 +1,25 @@
+{
+  "pagelen": 10,
+  "values": [
+    {
+      "name": "v0.0.0",
+      "target": {
+        "parents": [
+          {
+            "hash": "00747e770a6ad2763f316262e60ab66b9f264032",
+            "type": "commit",
+            "links": {
+              "self": {
+                "href": "/2.0/repositories/{{workspace}}/{{repo}}/commit/some-hash"
+              },
+              "html": {
+                "href": "/{{workspace}}/{{repo}}/commits/some-hash"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "page": 1
+}

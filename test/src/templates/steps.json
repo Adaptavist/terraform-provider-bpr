@@ -1,0 +1,15 @@
+{
+  "page": 1,
+  "values": [
+    {
+      "uuid": "{{uuid}}",
+      "name": "example",
+      "state": {
+        "name": "example",
+        "result": {
+          "name": "SUCCESSFUL"
+        }
+      }
+    }
+  ]
+}
