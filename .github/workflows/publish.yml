@@ -1,8 +1,9 @@
 name: Publish
 
 on:
-  tag:
-    - 'v*'
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   publish:
@@ -11,8 +12,14 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-        go-version: 1.17
-      - uses: actions/checkout@master
+          go-version: 1.17
+      - uses: actions/checkout@master      
+      - name: Import GPG key
+        id: import_gpg
+        uses: hashicorp/ghaction-import-gpg@v2.1.0
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -20,4 +27,5 @@ jobs:
           version: latest
           args: release  --rm-dist
         env:
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

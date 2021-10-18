@@ -11,14 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
-      - run: go test -v ./...
+      - run: make test
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - uses: go-semantic-release/action@v1.11.2
         with:
-          dry: true
           changelog-file: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
