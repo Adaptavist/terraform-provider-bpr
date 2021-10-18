@@ -1,0 +1,19 @@
+{
+  "name": "{{tag}}",
+  "target": {
+    "parents": [
+      {
+        "hash": "s0m3h4shv4lu3",
+        "type": "commit",
+        "links": {
+          "self": {
+            "href": "/2.0/repositories/{{workspace}}/{{repo}}/commit/some-hash"
+          },
+          "html": {
+            "href": "/{{workspace}}/{{repo}}/commits/some-hash"
+          }
+        }
+      }
+    ]
+  }
+}
