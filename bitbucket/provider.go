@@ -83,8 +83,8 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 
 		return &client.Client{
 			Config: &client.Config{
-				Username:   d.Get("password").(string),
-				Password:   d.Get("username").(string),
+				Username:   d.Get("username").(string),
+				Password:   d.Get("password").(string),
 				BaseURL:    d.Get("base_url").(string),
 				Workspace:  valueAsPointer("workspace", d),
 				Repository: valueAsPointer("repository", d),
@@ -95,7 +95,6 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 
 func valueAsPointer(k string, d *schema.ResourceData) *string {
 	if v := d.Get(k).(string); v != "" {
-		print(v)
 		return &v
 	}
 	return nil
