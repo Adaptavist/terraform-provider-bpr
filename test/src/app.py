@@ -1,5 +1,6 @@
-from flask import Flask, render_template
+from json import dumps
 from uuid import uuid4
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -47,4 +48,20 @@ Some other logging info after outputs
 
 @app.route('/2.0/repositories/<w>/<r>/pipelines/', methods=['POST'])
 def post_pipeline(w, r):
-    return get_pipeline(w, r, '{' + uuid4().__str__() + '}')
+    data = request.get_json()
+    data['UUID'] = uuid4().__str__()
+    data['state'] = {
+        "name": "COMPLETED",
+        "type": "pipeline_state_completed",
+        "result": {
+            "name": "SUCCESSFUL",
+            "type": "pipeline_state_completed_successful"
+        }
+    }
+    data["build_number"] = 1
+    data["created_on"] = "2021-03-10T00:32:47.890073Z"
+    data["completed_on"] = "2021-03-10T00:33:08.060765Z"
+
+    app.logger.info(dumps(data))
+
+    return data

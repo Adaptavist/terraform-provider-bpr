@@ -30,6 +30,8 @@ func TestBitbucketPipelines_Run(t *testing.T) {
 					resource.TestMatchResourceAttr("bpr_run.this", "pipeline", regexp.MustCompile("custom")),
 					resource.TestMatchResourceAttr("bpr_run.this", "outputs.string_output", regexp.MustCompile("value")),
 					resource.TestMatchResourceAttr("bpr_run.this", "outputs.map_output.map_key", regexp.MustCompile("value")),
+					resource.TestMatchResourceAttr("bpr_run.this", "output", regexp.MustCompile("Some other logging info before outputs")),
+					resource.TestMatchResourceAttr("bpr_run.this", "output", regexp.MustCompile("Some other logging info after outputs")),
 				),
 			},
 		},

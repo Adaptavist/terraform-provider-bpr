@@ -2,7 +2,7 @@ package bitbucket
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"github.com/adaptavist/bitbucket_pipelines_client/builders"
 	"github.com/adaptavist/bitbucket_pipelines_client/client"
 	"github.com/adaptavist/bitbucket_pipelines_client/model"
@@ -63,6 +63,11 @@ func resourceBitbucketPipelineSchema() map[string]*schema.Schema {
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			Description: "Map of variables for the pipeline",
 		},
+		"output": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The full pipeline output",
+		},
 		"outputs": {
 			Type:        schema.TypeMap,
 			Computed:    true,
@@ -82,12 +87,7 @@ func resourceBitbucketPipelineInvoke(ctx context.Context, d *schema.ResourceData
 	pipeline := builders.Pipeline()
 
 	for key, value := range d.Get("variables").(map[string]interface{}) {
-		encoded, err := json.Marshal(value)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		// TODO: add support for secured variables
-		pipeline.Variable(key, string(encoded), false)
+		pipeline.Variable(key, fmt.Sprintf("%v", value), false)
 	}
 
 	target := builders.Target()
@@ -129,35 +129,25 @@ func resourceBitbucketPipelineInvoke(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	d.SetId(*response.UUID)
-
-	return resourceBitbucketPipelineRead(ctx, d, meta)
-}
-
-func resourceBitbucketPipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	pipeline, err := getPipeline(d, meta)
+	steps, err := getPipelineSteps(d, meta, response)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(*pipeline.UUID)
+	// extract the pipeline output and its containing outputs
 
-	steps, err := getPipelineSteps(d, meta, pipeline)
-
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
+	output := ""
 	outputs := map[string]interface{}{}
 
 	for _, step := range steps {
-		log, err := getPipelineStepLog(d, meta, pipeline, &step)
+		log, err := getPipelineStepLog(d, meta, response, &step)
 
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
+		output = output + "\n" + log
 		logData, err := extractOutputs(log)
 
 		if err != nil {
@@ -169,11 +159,15 @@ func resourceBitbucketPipelineRead(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
+	// flatten outputs
+
 	flat, err := flatten.Flatten(outputs, "", flatten.DotStyle)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	// set the pipeline outputs (extracted from the pipeline)
 
 	err = d.Set("outputs", flat)
 
@@ -181,6 +175,21 @@ func resourceBitbucketPipelineRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	// set the pipeline output
+
+	err = d.Set("output", output)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(*response.UUID)
+
+	return resourceBitbucketPipelineRead(ctx, d, meta)
+}
+
+func resourceBitbucketPipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// Do not try to read from the API, as the pipeline doesn't always exist
 	return nil
 }
 
