@@ -94,6 +94,10 @@ func resourceBitbucketPipelineInvoke(ctx context.Context, d *schema.ResourceData
 
 	fmt.Printf("[DEBUG]: %s\n", *response.UUID)
 
+	if !response.State.Result.OK() {
+		return diag.Errorf("Pipeline failed to complete successfully: %s", response.State.Result.Error.Message)
+	}
+
 	steps, err := getPipelineSteps(d, meta, response)
 
 	if err != nil {
