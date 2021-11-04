@@ -2,6 +2,13 @@
 
 Run Bitbucket pipelines straight from Terraform!
 
+## WARNING 
+
+__This is an experimental provider__
+
+Adaptavist are using this internally to test how we can provide services to our engineering teams via BitBucket
+pipelines. Use at your own risk.
+
 ## Usage
 
 ```terraform
