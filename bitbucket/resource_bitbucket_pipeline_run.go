@@ -3,9 +3,6 @@ package bitbucket
 import (
 	"context"
 	"fmt"
-	"github.com/adaptavist/bitbucket_pipelines_client/builders"
-	"github.com/adaptavist/bitbucket_pipelines_client/client"
-	"github.com/adaptavist/bitbucket_pipelines_client/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jeremywohl/flatten"
@@ -82,52 +79,20 @@ func resourceBitbucketPipelineSchema() map[string]*schema.Schema {
 }
 
 func resourceBitbucketPipelineInvoke(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	cli := meta.(*client.Client)
-
-	pipeline := builders.Pipeline()
-
-	for key, value := range d.Get("variables").(map[string]interface{}) {
-		pipeline.Variable(key, fmt.Sprintf("%v", value), false)
-	}
-
-	target := builders.Target()
-
-	if pattern := d.Get("pipeline").(string); pattern != "" {
-		target.Pattern(pattern)
-	}
-
-	if tag := d.Get("tag").(string); tag != "" {
-		// retrieve the tag from Bitbucket as we'll need the commit hash
-		tagResponse, err := cli.GetTag(model.GetTagRequest{
-			Workspace:  valueAsPointer("workspace", d),
-			Repository: valueAsPointer("repository", d),
-			Tag:        tag,
-		})
-
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		target.Tag(tag, tagResponse.Target.Hash)
-	}
-
-	if branch := d.Get("branch").(string); branch != "" {
-		target.Branch(branch)
-	}
-
-	pipeline.Target(target.Build())
-
-	request := model.PostPipelineRequest{
-		Workspace:  valueAsPointer("workspace", d),
-		Repository: valueAsPointer("repository", d),
-		Pipeline:   pipeline.Build(),
-	}
-
-	response, err := cli.RunPipeline(request)
+	// adding some timeout functionality to stop of waiting forever!
+	request, err := makePipelineRequest(d, meta)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	response, err := runPipeline(ctx, meta, *request)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	fmt.Printf("[DEBUG]: %s\n", *response.UUID)
 
 	steps, err := getPipelineSteps(d, meta, response)
 
@@ -188,12 +153,12 @@ func resourceBitbucketPipelineInvoke(ctx context.Context, d *schema.ResourceData
 	return resourceBitbucketPipelineRead(ctx, d, meta)
 }
 
-func resourceBitbucketPipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBitbucketPipelineRead(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	// Do not try to read from the API, as the pipeline doesn't always exist
 	return nil
 }
 
-func resourceBitbucketPipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBitbucketPipelineDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	d.SetId("")
 	return nil
 }
