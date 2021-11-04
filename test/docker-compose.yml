@@ -1,6 +1,7 @@
 version: "3.9"
 services:
   web:
+    container_name: "terraform-provider-bpr-test"
     build: .
     environment:
       FLASK_ENV: development

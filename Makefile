@@ -6,7 +6,7 @@ BIN_NAME=${PREFIX}_${RELEASE}_${GOOS}_${GOARCH}
 .PHONY: up down test
 
 up:
-	cd test && docker-compose up -d
+	cd test && docker-compose up -d --build
 
 down:
 	cd test && docker-compose down
