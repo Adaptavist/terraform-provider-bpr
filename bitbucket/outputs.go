@@ -2,6 +2,7 @@ package bitbucket
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -15,6 +16,8 @@ func extractOutputs(log string) (result map[string]interface{}, err error) {
 	if start != -1 && stop != -1{
 		dataStr := log[start+len(jsonStart) : stop]
 		err = json.Unmarshal([]byte(dataStr), &result)
+	} else {
+		fmt.Println("[DEBUG]: no outputs found")
 	}
 	return
 }
