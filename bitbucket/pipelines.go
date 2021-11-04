@@ -113,20 +113,6 @@ func runPipeline(ctx context.Context, meta interface{}, request model.PostPipeli
 	}
 }
 
-
-func getPipeline(d *schema.ResourceData, meta interface{}) (*model.Pipeline, error) {
-	cli := meta.(*client.Client)
-	request := model.GetPipelineRequest{
-		Workspace:  valueAsPointer("workspace", d),
-		Repository: valueAsPointer("repository", d),
-		Pipeline: &model.Pipeline{
-			UUID: valueAsPointer("id", d),
-		},
-	}
-	// We only really care about getting the outputs from the pipeline
-	return cli.GetPipeline(request)
-}
-
 func getPipelineSteps(d *schema.ResourceData, meta interface{}, pipeline *model.Pipeline) (model.PipelineSteps, error) {
 	cli := meta.(*client.Client)
 	return cli.GetPipelineSteps(model.GetPipelineRequest{
